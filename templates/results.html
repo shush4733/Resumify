@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analysis Results — Resumify</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c12;
+    --card: #141822;
+    --card-border: #232838;
+    --ink: #eef0f6;
+    --muted: #8b91a3;
+    --violet: #8b6cff;
+    --cyan: #22d3ee;
+    --good: #34d399;
+    --good-soft: rgba(52,211,153,0.10);
+    --warn: #fb923c;
+    --warn-soft: rgba(251,146,60,0.10);
+    --grad: linear-gradient(135deg, #8b6cff 0%, #5b7fff 45%, #22d3ee 100%);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    top: -15%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1000px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(139,108,255,0.16) 0%, rgba(34,211,238,0.06) 40%, transparent 70%);
+    filter: blur(40px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 740px;
+    margin: 0 auto;
+    padding: 56px 24px 90px;
+  }
+
+  .brand-row {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 28px;
+  }
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: var(--grad);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px -4px rgba(139,108,255,0.55);
+    flex-shrink: 0;
+  }
+  .brand-mark svg { width: 16px; height: 16px; }
+  .brand-name {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #ffffff 40%, #c2bcff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .back-link {
+    font-size: 13.5px;
+    color: var(--muted);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 28px;
+    transition: color 0.15s ease;
+  }
+  .back-link:hover { color: var(--cyan); }
+
+  .score-card {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 32px;
+    background: linear-gradient(180deg, var(--card) 0%, #10131c 100%);
+    box-shadow: 0 20px 60px -24px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.03);
+    margin-bottom: 36px;
+  }
+  .score-ring {
+    position: relative;
+    width: 116px;
+    height: 116px;
+    flex-shrink: 0;
+  }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring circle { fill: none; stroke-width: 10; }
+  .score-ring .bg { stroke: #1c2130; }
+  .score-ring .fg {
+    stroke: url(#scoreGradient);
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 6px rgba(139,108,255,0.5));
+  }
+  .score-number {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .score-number .num {
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .score-number .denom {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 2px;
+  }
+  .score-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .score-text h2 {
+    margin: 0 0 6px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 23px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #ffffff 30%, #b8b3ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .score-text p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13.5px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .section { margin-bottom: 32px; }
+  .section h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section h3::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 6px var(--cyan);
+  }
+
+  .card-list {
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--card);
+  }
+  .card-item {
+    padding: 15px 18px;
+    border-bottom: 1px solid var(--card-border);
+    font-size: 14px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .card-item:last-child { border-bottom: none; }
+  .card-item.strength { background: var(--good-soft); }
+  .card-item.feedback { background: var(--warn-soft); }
+  .icon-badge {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  .strength .icon-badge { background: var(--good); color: #0a0c12; }
+  .feedback .icon-badge { background: var(--warn); color: #0a0c12; }
+
+  .pill-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill {
+    background: var(--good-soft);
+    border: 1px solid rgba(52,211,153,0.3);
+    color: var(--good);
+    border-radius: 999px;
+    padding: 6px 13px;
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .pill.missing {
+    background: var(--warn-soft);
+    border: 1px solid rgba(251,146,60,0.3);
+    color: var(--warn);
+  }
+
+  .sections-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .sec-tag {
+    border: 1px solid var(--card-border);
+    border-radius: 11px;
+    padding: 13px 16px;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card);
+  }
+  .sec-tag .yes { color: var(--good); font-weight: bold; }
+  .sec-tag .no { color: var(--warn); font-weight: bold; }
+
+  .jd-match {
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 28px;
+    background: linear-gradient(180deg, var(--card) 0%, #10131c 100%);
+  }
+  .jd-match .match-percent {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 38px;
+    font-weight: 700;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .empty {
+    color: var(--muted);
+    font-size: 13.5px;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand-row">
+    <div class="brand-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0a0c12" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 3.5h7l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19V5A1.5 1.5 0 0 1 7.5 3.5Z"/>
+        <path d="M14 3.5V8h4.5"/>
+        <path d="M9 13.5l2 2 4-4.5"/>
+      </svg>
+    </div>
+    <div class="brand-name">Resumify</div>
+  </div>
+
+  <a href="/" class="back-link">&larr; Analyze another resume</a>
+
+  <div class="score-card">
+    <div class="score-ring">
+      <svg width="116" height="116">
+        <defs>
+          <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#8b6cff"/>
+            <stop offset="100%" stop-color="#22d3ee"/>
+          </linearGradient>
+        </defs>
+        <circle class="bg" cx="58" cy="58" r="48"></circle>
+        <circle class="fg" cx="58" cy="58" r="48"
+          stroke-dasharray="{{ 2 * 3.14159 * 48 }}"
+          stroke-dashoffset="{{ 2 * 3.14159 * 48 * (1 - result.score / 100) }}">
+        </circle>
+      </svg>
+      <div class="score-number">
+        <span class="num">{{ result.score }}</span>
+        <span class="denom">/100</span>
+      </div>
+    </div>
+    <div class="score-text">
+      <div class="score-label">Resume Score</div>
+      <h2>
+        {% if result.score >= 80 %}Strong resume
+        {% elif result.score >= 60 %}Good, with room to improve
+        {% else %}Needs work
+        {% endif %}
+      </h2>
+      <p>{{ filename }} &middot; {{ result.word_count }} words</p>
+    </div>
+  </div>
+
+  {% if jd_result %}
+  <div class="section">
+    <h3>Job Description Match</h3>
+    <div class="jd-match">
+      <div class="match-percent">{{ jd_result.match_percent }}%</div>
+      <p class="empty" style="margin: 8px 0 18px;">Similarity between your resume and the pasted job description.</p>
+      {% if jd_result.missing_keywords %}
+        <div style="font-size: 13px; color: var(--muted); margin-bottom: 12px;">Keywords in the JD not found in your resume:</div>
+        <div class="pill-row">
+          {% for kw in jd_result.missing_keywords %}
+            <span class="pill missing">{{ kw }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="section">
+    <h3>Sections Detected</h3>
+    <div class="sections-grid">
+      {% for sec, found in result.sections_detected.items() %}
+        <div class="sec-tag">
+          <span>{{ sec.capitalize() }}</span>
+          {% if found %}<span class="yes">&#10003;</span>{% else %}<span class="no">&#10007;</span>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Strengths</h3>
+    <div class="card-list">
+      {% for s in result.strengths %}
+        <div class="card-item strength">
+          <span class="icon-badge">&#10003;</span>
+          <span>{{ s }}</span>
+        </div>
+      {% else %}
+        <div class="card-item"><span class="empty">No strengths detected yet.</span></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Suggestions for Improvement</h3>
+    <div class="card-list">
+      {% for f in result.feedback %}
+        <div class="card-item feedback">
+          <span class="icon-badge">!</span>
+          <span>{{ f }}</span>
+        </div>
+      {% else %}
+        <div class="card-item"><span class="empty">No issues found — great job!</span></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Contact Info Detected</h3>
+    <div class="card-list">
+      <div class="card-item"><span>Email: {{ result.contact.email or "Not found" }}</span></div>
+      <div class="card-item"><span>Phone: {{ result.contact.phone or "Not found" }}</span></div>
+      <div class="card-item"><span>LinkedIn: {{ result.contact.linkedin if result.contact.linkedin else "Not found" }}</span></div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
