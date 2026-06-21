@@ -173,6 +173,17 @@
     border-color: var(--cyan);
     background: var(--grad-soft);
   }
+  .dropzone.shake {
+    animation: shake 0.4s ease;
+    border-color: #ef4444;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
   .dropzone input[type="file"] { display: none; }
 
   .upload-icon {
@@ -295,10 +306,10 @@
     {% endif %}
   {% endwith %}
 
-  <form action="/analyze" method="post" enctype="multipart/form-data">
+  <form action="/analyze" method="post" enctype="multipart/form-data" id="resumeForm">
     <label>Resume File</label>
     <div class="dropzone" id="dropzone">
-      <input type="file" name="resume" id="resume" accept=".pdf,.docx" required>
+      <input type="file" name="resume" id="resume" accept=".pdf,.docx">
       <label for="resume" class="dropzone-label">
         <div class="upload-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="#0a0c12" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
@@ -343,6 +354,17 @@
       input.files = e.dataTransfer.files;
       fileName.textContent = "✓ " + input.files[0].name;
       dropzone.classList.add('has-file');
+    }
+  });
+
+  const form = document.getElementById('resumeForm');
+  form.addEventListener('submit', (e) => {
+    if (input.files.length === 0) {
+      e.preventDefault();
+      dropzone.classList.add('shake');
+      fileName.textContent = "⚠ No file selected — please choose a resume.";
+      fileName.style.color = "#fca5a5";
+      setTimeout(() => dropzone.classList.remove('shake'), 400);
     }
   });
 </script>

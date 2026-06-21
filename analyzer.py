@@ -89,6 +89,64 @@ def find_contact_info(text):
 
 
 # ----------------------------
+# 2b. RESUME VALIDATION
+# ----------------------------
+
+# Words/phrases that strongly suggest a document IS a resume
+RESUME_SIGNAL_KEYWORDS = [
+    "experience", "education", "skills", "objective", "summary",
+    "certification", "certifications", "internship", "projects",
+    "qualification", "qualifications", "achievements", "references",
+    "employment", "career", "resume", "curriculum vitae", "cv"
+]
+
+
+def looks_like_resume(text):
+    """
+    Heuristic check to catch obviously non-resume documents
+    (essays, random PDFs, etc.) before running full analysis.
+
+    A real resume almost always has:
+      - contact info (email or phone), AND
+      - at least one recognizable resume-related keyword/section
+
+    If a document has neither, it's very unlikely to be a resume.
+    Returns: (is_resume: bool, reason: str or None)
+    """
+    if not text or len(text.strip()) < 30:
+        return False, "The document appears to be empty or too short to be a resume."
+
+    contact = find_contact_info(text)
+    has_contact = contact["email_found"] or contact["phone_found"]
+
+    text_lower = text.lower()
+    # Use word-boundary matching so "educational" doesn't falsely match "education"
+    keyword_hits = sum(
+        1 for kw in RESUME_SIGNAL_KEYWORDS
+        if re.search(r"\b" + re.escape(kw) + r"\b", text_lower)
+    )
+
+    word_count = len(text.split())
+
+    # Reject if it has no contact info AND fewer than 2 distinct resume keywords —
+    # a single incidental keyword mention (e.g. "my experience was great") isn't enough
+    if not has_contact and keyword_hits < 2:
+        return False, (
+            "This file doesn't look like a resume — no contact details or resume-related "
+            "sections (Experience, Education, Skills, etc.) were found. Please upload a resume file."
+        )
+
+    # Reject very long documents with weak resume signal — likely an essay/report
+    if word_count > 1000 and keyword_hits <= 2 and not has_contact:
+        return False, (
+            "This file looks like a general document rather than a resume. "
+            "Please upload a resume file."
+        )
+
+    return True, None
+
+
+# ----------------------------
 # 3. ACTION VERBS & QUANTIFICATION
 # ----------------------------
 

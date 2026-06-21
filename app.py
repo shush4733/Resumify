@@ -9,7 +9,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from werkzeug.utils import secure_filename
 
 from parser import extract_text
-from analyzer import analyze_resume, match_with_jd
+from analyzer import analyze_resume, match_with_jd, looks_like_resume
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-this")
@@ -62,6 +62,12 @@ def analyze():
 
     if error:
         flash(error)
+        return redirect(url_for("index"))
+
+    # --- Validate that this is actually a resume, not some other document ---
+    is_resume, reason = looks_like_resume(text)
+    if not is_resume:
+        flash(reason)
         return redirect(url_for("index"))
 
     # --- Run analysis ---
