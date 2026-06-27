@@ -7,9 +7,12 @@ import os
 import tempfile
 from flask import Flask, render_template, request, redirect, url_for, flash
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
+
+load_dotenv()  # loads .env file locally (ignored on Render where env vars are set directly)
 
 from parser import extract_text
-from analyzer import analyze_resume, match_with_jd, looks_like_resume
+from analyzer import analyze_resume, match_with_jd, looks_like_resume, get_ai_feedback
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-this")
@@ -79,10 +82,14 @@ def analyze():
     if jd_text:
         jd_result = match_with_jd(text, jd_text)
 
+    # --- Gemini AI feedback ---
+    ai_feedback = get_ai_feedback(text, result["score"])
+
     return render_template(
         "results.html",
         result=result,
         jd_result=jd_result,
+        ai_feedback=ai_feedback,
         filename=filename
     )
 

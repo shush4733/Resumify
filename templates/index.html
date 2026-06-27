@@ -5,368 +5,217 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Resumify</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0c12;
-    --bg-soft: #11141d;
-    --card: #141822;
-    --card-border: #232838;
-    --ink: #eef0f6;
-    --muted: #8b91a3;
-    --violet: #8b6cff;
-    --cyan: #22d3ee;
-    --grad: linear-gradient(135deg, #8b6cff 0%, #5b7fff 45%, #22d3ee 100%);
-    --grad-soft: linear-gradient(135deg, rgba(139,108,255,0.14), rgba(34,211,238,0.10));
-  }
-  * { box-sizing: border-box; }
-  html, body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--ink);
-    font-family: 'Inter', sans-serif;
-    line-height: 1.55;
-    min-height: 100vh;
-  }
+:root {
+  --bg: #07080f;
+  --bg2: #0d0e1a;
+  --card: #111220;
+  --border: #1e2035;
+  --border2: #2a2c45;
+  --ink: #f0f1fa;
+  --muted: #7c7f9a;
+  --dim: #3a3d56;
+  --v1: #7c5cfc;
+  --v2: #5b7fff;
+  --c1: #1de9b6;
+  --grad: linear-gradient(135deg, #7c5cfc 0%, #5b7fff 50%, #1de9b6 100%);
+  --gsoft: linear-gradient(135deg, rgba(124,92,252,0.12) 0%, rgba(29,233,182,0.06) 100%);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
 
-  /* ambient background glow */
-  body::before {
-    content: "";
-    position: fixed;
-    top: -20%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 1100px;
-    height: 700px;
-    background: radial-gradient(circle, rgba(139,108,255,0.20) 0%, rgba(34,211,238,0.08) 40%, transparent 70%);
-    filter: blur(40px);
-    pointer-events: none;
-    z-index: 0;
-    animation: drift 14s ease-in-out infinite alternate;
-  }
-  @keyframes drift {
-    0% { transform: translateX(-54%) translateY(0px); }
-    100% { transform: translateX(-46%) translateY(30px); }
-  }
+/* Layered background */
+.bg-layer{position:fixed;inset:0;pointer-events:none;z-index:0}
+.bg-orb{position:absolute;border-radius:50%;filter:blur(80px)}
+.orb1{width:700px;height:700px;top:-200px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(124,92,252,0.25) 0%,transparent 65%);animation:orb-drift 18s ease-in-out infinite alternate}
+.orb2{width:400px;height:400px;bottom:-100px;right:-80px;background:radial-gradient(circle,rgba(29,233,182,0.12) 0%,transparent 65%);animation:orb-drift 14s 3s ease-in-out infinite alternate-reverse}
+.orb3{width:300px;height:300px;top:40%;left:-60px;background:radial-gradient(circle,rgba(91,127,255,0.10) 0%,transparent 65%);animation:orb-drift 20s 6s ease-in-out infinite alternate}
+@keyframes orb-drift{0%{transform:translate(0,0) translateX(-50%)}100%{transform:translate(20px,30px) translateX(-50%)}}
+.grid-lines{position:absolute;inset:0;background-image:linear-gradient(rgba(124,92,252,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,92,252,0.04) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,black 0%,transparent 100%)}
 
-  .wrap {
-    position: relative;
-    z-index: 1;
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 72px 24px 80px;
-  }
+.wrap{position:relative;z-index:1;max-width:620px;margin:0 auto;padding:64px 24px 80px}
 
-  .brand-row {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    margin-bottom: 36px;
-  }
-  .brand-mark {
-    width: 32px;
-    height: 32px;
-    border-radius: 9px;
-    background: var(--grad);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 16px -4px rgba(139,108,255,0.55);
-    flex-shrink: 0;
-  }
-  .brand-mark svg { width: 17px; height: 17px; }
-  .brand-name {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 700;
-    font-size: 21px;
-    letter-spacing: -0.02em;
-    background: linear-gradient(135deg, #ffffff 40%, #c2bcff 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+/* Animations */
+@keyframes fade-up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+@keyframes shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes btn-loading{0%,100%{opacity:1}50%{opacity:0.6}}
 
-  .eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    margin-bottom: 18px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--cyan);
-  }
-  .eyebrow::before {
-    content: "";
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--cyan);
-    box-shadow: 0 0 8px var(--cyan);
-  }
+/* Brand */
+.brand-row{display:flex;align-items:center;gap:12px;margin-bottom:48px;animation:fade-up .5s ease both}
+.brand-mark{width:36px;height:36px;border-radius:10px;background:var(--grad);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 1px rgba(124,92,252,0.3),0 8px 24px -6px rgba(124,92,252,0.5)}
+.brand-mark svg{width:18px;height:18px}
+.brand-name{font-family:'Outfit',sans-serif;font-weight:700;font-size:22px;letter-spacing:-0.03em;background:linear-gradient(135deg,#fff 40%,#c4b5fd 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 
-  h1 {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 48px;
-    line-height: 1.05;
-    margin: 0 0 16px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    background: linear-gradient(135deg, #ffffff 30%, #b8b3ff 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .sub {
-    color: var(--muted);
-    font-size: 16.5px;
-    margin-bottom: 44px;
-    max-width: 46ch;
-  }
+/* Hero */
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--c1);margin-bottom:22px;animation:fade-up .5s .08s ease both}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--c1);box-shadow:0 0 12px var(--c1);animation:pulse-dot 2.5s ease-in-out infinite}
+h1{font-family:'Outfit',sans-serif;font-size:54px;font-weight:800;line-height:1.02;letter-spacing:-.03em;margin-bottom:18px;animation:fade-up .55s .14s ease both}
+h1 .word-grad{background:var(--grad);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s linear infinite}
+.sub{font-size:16.5px;line-height:1.65;color:var(--muted);max-width:44ch;margin-bottom:32px;animation:fade-up .55s .2s ease both}
 
-  .flash {
-    background: rgba(239,68,68,0.10);
-    border: 1px solid rgba(239,68,68,0.35);
-    color: #fca5a5;
-    padding: 13px 16px;
-    border-radius: 10px;
-    margin-bottom: 24px;
-    font-size: 14px;
-  }
+/* Pills */
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:44px;animation:fade-up .55s .26s ease both}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--border2);border-radius:999px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted);background:rgba(124,92,252,0.05);transition:all .2s}
+.pill:hover{border-color:rgba(124,92,252,.5);color:var(--ink);background:rgba(124,92,252,.1)}
+.pill-icon{width:5px;height:5px;border-radius:50%;background:var(--grad)}
 
-  form {
-    position: relative;
-    border: 1px solid var(--card-border);
-    border-radius: 18px;
-    padding: 36px;
-    background: linear-gradient(180deg, var(--card) 0%, #10131c 100%);
-    box-shadow: 0 20px 60px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.03);
-  }
+/* Flash */
+.flash{display:flex;align-items:center;gap:10px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);color:#fca5a5;padding:14px 16px;border-radius:12px;margin-bottom:24px;font-size:14px;animation:fade-up .4s ease both}
 
-  label {
-    display: block;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11.5px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 10px;
-  }
+/* Form card */
+form{position:relative;border:1px solid var(--border2);border-radius:22px;padding:36px;background:linear-gradient(160deg,rgba(20,22,38,0.95) 0%,rgba(10,11,20,0.98) 100%);box-shadow:0 0 0 1px rgba(124,92,252,.06),0 32px 80px -24px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.04);animation:fade-up .6s .3s ease both;overflow:hidden;backdrop-filter:blur(20px)}
+form::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(124,92,252,.6) 30%,rgba(29,233,182,.6) 70%,transparent 100%)}
+form::after{content:"";position:absolute;top:-80px;right:-80px;width:200px;height:200px;background:radial-gradient(circle,rgba(124,92,252,.08) 0%,transparent 70%);pointer-events:none}
 
-  .dropzone {
-    position: relative;
-    border: 1.5px dashed #2c3244;
-    border-radius: 14px;
-    padding: 36px 24px;
-    text-align: center;
-    margin-bottom: 30px;
-    background: rgba(255,255,255,0.015);
-    transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
-    overflow: hidden;
-  }
-  .dropzone:hover {
-    border-color: var(--violet);
-    background: var(--grad-soft);
-  }
-  .dropzone.has-file {
-    border-color: var(--cyan);
-    background: var(--grad-soft);
-  }
-  .dropzone.shake {
-    animation: shake 0.4s ease;
-    border-color: #ef4444;
-  }
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-6px); }
-    40% { transform: translateX(6px); }
-    60% { transform: translateX(-4px); }
-    80% { transform: translateX(4px); }
-  }
-  .dropzone input[type="file"] { display: none; }
+.field-label{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
 
-  .upload-icon {
-    width: 42px;
-    height: 42px;
-    margin: 0 auto 14px;
-    border-radius: 11px;
-    background: var(--grad);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 24px -8px rgba(139,108,255,0.6);
-  }
-  .upload-icon svg { width: 20px; height: 20px; }
+/* Dropzone */
+.dropzone{border:1.5px dashed var(--border2);border-radius:16px;padding:40px 24px;text-align:center;margin-bottom:26px;background:rgba(255,255,255,.012);transition:all .25s;cursor:pointer;position:relative;overflow:hidden}
+.dropzone::before{content:"";position:absolute;inset:0;background:var(--gsoft);opacity:0;transition:opacity .25s}
+.dropzone:hover{border-color:rgba(124,92,252,.6);box-shadow:0 0 0 4px rgba(124,92,252,.06),inset 0 0 30px rgba(124,92,252,.04)}
+.dropzone:hover::before{opacity:1}
+.dropzone.has-file{border-color:var(--c1);border-style:solid;box-shadow:0 0 0 4px rgba(29,233,182,.06)}
+.dropzone.shake{animation:shake .4s ease}
+.dropzone input{display:none}
+.upload-wrap{position:relative;z-index:1}
+.upload-icon-ring{width:56px;height:56px;margin:0 auto 14px;border-radius:16px;background:var(--grad);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 8px rgba(124,92,252,.08),0 12px 32px -8px rgba(124,92,252,.6);transition:transform .2s,box-shadow .2s}
+.dropzone:hover .upload-icon-ring{transform:translateY(-3px);box-shadow:0 0 0 12px rgba(124,92,252,.1),0 18px 40px -8px rgba(124,92,252,.7)}
+.upload-icon-ring svg{width:24px;height:24px}
+.dz-title{font-size:15px;color:var(--ink);margin-bottom:6px}
+.dz-title strong{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.dz-sub{font-size:12.5px;color:var(--muted)}
+#file-name{margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--c1);font-weight:500;position:relative;z-index:1}
 
-  .dropzone-label {
-    cursor: pointer;
-    color: var(--ink);
-    font-size: 14.5px;
-  }
-  .dropzone-label strong {
-    background: linear-gradient(135deg, var(--violet), var(--cyan));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .dropzone-sub {
-    font-size: 12.5px;
-    color: var(--muted);
-    margin-top: 6px;
-  }
-  #file-name {
-    margin-top: 14px;
-    font-size: 13px;
-    color: var(--cyan);
-    font-weight: 600;
-    font-family: 'JetBrains Mono', monospace;
-  }
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin:26px 0}
 
-  textarea {
-    width: 100%;
-    min-height: 120px;
-    padding: 16px;
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
-    background: rgba(255,255,255,0.02);
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    resize: vertical;
-    color: var(--ink);
-    transition: border-color 0.2s ease;
-  }
-  textarea::placeholder { color: #565c6e; }
-  textarea:focus {
-    outline: none;
-    border-color: var(--violet);
-  }
-  .hint {
-    font-size: 12.5px;
-    color: var(--muted);
-    margin-top: 8px;
-  }
+textarea{width:100%;min-height:108px;padding:16px;border:1px solid var(--border2);border-radius:13px;background:rgba(255,255,255,.018);font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);resize:vertical;transition:border-color .2s,box-shadow .2s}
+textarea::placeholder{color:var(--dim)}
+textarea:focus{outline:none;border-color:rgba(124,92,252,.6);box-shadow:0 0 0 3px rgba(124,92,252,.1)}
+.hint{font-size:12.5px;color:var(--dim);margin-top:8px}
 
-  button {
-    width: 100%;
-    margin-top: 30px;
-    padding: 16px;
-    background: var(--grad);
-    color: #0a0c12;
-    border: none;
-    border-radius: 12px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 15.5px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    box-shadow: 0 10px 30px -10px rgba(139,108,255,0.5);
-  }
-  button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 36px -10px rgba(139,108,255,0.65);
-  }
-  button:active { transform: translateY(0); }
+/* Submit button */
+.btn{width:100%;margin-top:26px;padding:17px;background:var(--grad);border:none;border-radius:14px;font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:#06070e;cursor:pointer;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s;box-shadow:0 8px 32px -8px rgba(124,92,252,.6),0 0 0 1px rgba(124,92,252,.2)}
+.btn::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.2) 0%,transparent 50%);pointer-events:none}
+.btn::after{content:"";position:absolute;top:50%;left:-60%;width:40%;height:100%;background:rgba(255,255,255,.15);transform:translateY(-50%) skewX(-20deg);transition:left .5s ease}
+.btn:hover{transform:translateY(-2px);box-shadow:0 14px 44px -8px rgba(124,92,252,.75),0 0 0 1px rgba(124,92,252,.3)}
+.btn:hover::after{left:160%}
+.btn:active{transform:translateY(0)}
+.btn.loading{animation:btn-loading 1s ease infinite;pointer-events:none}
 
-  .footer-note {
-    margin-top: 28px;
-    font-size: 12.5px;
-    color: var(--muted);
-    text-align: center;
-  }
+.footer-note{margin-top:24px;font-size:12.5px;color:var(--dim);text-align:center;animation:fade-up .6s .4s ease both;display:flex;align-items:center;justify-content:center;gap:6px}
 
-  @media (max-width: 480px) {
-    h1 { font-size: 36px; }
-    form { padding: 24px; }
-  }
+@media(max-width:480px){h1{font-size:36px}form{padding:22px}.wrap{padding:48px 16px 64px}}
 </style>
 </head>
 <body>
+<div class="bg-layer">
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+  <div class="bg-orb orb3"></div>
+  <div class="grid-lines"></div>
+</div>
+
 <div class="wrap">
   <div class="brand-row">
     <div class="brand-mark">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#0a0c12" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#06070e" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
         <path d="M7 3.5h7l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19V5A1.5 1.5 0 0 1 7.5 3.5Z"/>
-        <path d="M14 3.5V8h4.5"/>
-        <path d="M9 13.5l2 2 4-4.5"/>
+        <path d="M14 3.5V8h4.5"/><path d="M9 13.5l2 2 4-4.5"/>
       </svg>
     </div>
     <div class="brand-name">Resumify</div>
   </div>
 
-  <div class="eyebrow">AI-Powered Resume Analysis</div>
-  <h1>Make your resume<br>impossible to ignore.</h1>
-  <p class="sub">Upload your resume for an instant score, structural feedback, and a job-match check — powered by NLP, not guesswork.</p>
+  <div class="eyebrow"><span class="dot"></span>AI-Powered Resume Analysis</div>
+
+  <h1>Make your resume<br><span class="word-grad">impossible</span> to ignore.</h1>
+
+  <p class="sub">Get an instant score, AI-generated feedback, and a job-match check — powered by NLP and Groq AI, in seconds.</p>
+
+  <div class="pills">
+    <span class="pill"><span class="pill-icon"></span>Instant Scoring</span>
+    <span class="pill"><span class="pill-icon"></span>Groq AI Feedback</span>
+    <span class="pill"><span class="pill-icon"></span>JD Matching</span>
+    <span class="pill"><span class="pill-icon"></span>PDF &amp; DOCX</span>
+    <span class="pill"><span class="pill-icon"></span>Free</span>
+  </div>
 
   {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      {% for message in messages %}
-        <div class="flash">{{ message }}</div>
-      {% endfor %}
-    {% endif %}
+    {% if messages %}{% for m in messages %}
+      <div class="flash">⚠ {{ m }}</div>
+    {% endfor %}{% endif %}
   {% endwith %}
 
   <form action="/analyze" method="post" enctype="multipart/form-data" id="resumeForm">
-    <label>Resume File</label>
+    <label class="field-label">Resume File</label>
     <div class="dropzone" id="dropzone">
       <input type="file" name="resume" id="resume" accept=".pdf,.docx">
-      <label for="resume" class="dropzone-label">
-        <div class="upload-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#0a0c12" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 16V4M12 4l-4 4M12 4l4 4"/>
-            <path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+      <label for="resume" class="upload-wrap">
+        <div class="upload-icon-ring">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#06070e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 15V3M12 3L8 7M12 3l4 4"/><path d="M3 17v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3"/>
           </svg>
         </div>
-        <div><strong>Click to upload</strong> or drag a file here</div>
-        <div class="dropzone-sub">PDF or DOCX &middot; up to 5MB</div>
+        <div class="dz-title"><strong>Click to upload</strong> or drag &amp; drop</div>
+        <div class="dz-sub">PDF or DOCX · up to 5MB</div>
       </label>
       <div id="file-name"></div>
     </div>
 
-    <label for="job_description">Job Description (optional)</label>
-    <textarea name="job_description" id="job_description" placeholder="Paste a job description here to see how well your resume matches it..."></textarea>
+    <div class="divider"></div>
+
+    <label class="field-label" for="job_description">Job Description <span style="color:var(--dim);font-size:10px;letter-spacing:.08em">(OPTIONAL)</span></label>
+    <textarea name="job_description" id="job_description" placeholder="Paste a job description to see how well your resume matches it..."></textarea>
     <div class="hint">Leave blank to skip job-match scoring.</div>
 
-    <button type="submit">Analyze Resume →</button>
+    <button type="submit" class="btn" id="submitBtn">Analyze Resume →</button>
   </form>
 
-  <div class="footer-note">Your file is analyzed locally and not shared with third parties.</div>
+  <div class="footer-note">🔒 Your file is processed locally and never stored.</div>
 </div>
 
 <script>
-  const input = document.getElementById('resume');
-  const dropzone = document.getElementById('dropzone');
-  const fileName = document.getElementById('file-name');
+const input = document.getElementById('resume');
+const dropzone = document.getElementById('dropzone');
+const fileName = document.getElementById('file-name');
+const submitBtn = document.getElementById('submitBtn');
+const form = document.getElementById('resumeForm');
 
-  input.addEventListener('change', () => {
-    if (input.files.length > 0) {
-      fileName.textContent = "✓ " + input.files[0].name;
-      dropzone.classList.add('has-file');
-    }
-  });
+input.addEventListener('change', () => {
+  if (input.files.length > 0) {
+    fileName.textContent = '✓ ' + input.files[0].name;
+    dropzone.classList.add('has-file');
+    dropzone.classList.remove('shake');
+  }
+});
 
-  ['dragover', 'drop'].forEach(evt => {
-    dropzone.addEventListener(evt, e => e.preventDefault());
-  });
+['dragover','drop'].forEach(e => dropzone.addEventListener(e, ev => ev.preventDefault()));
+dropzone.addEventListener('drop', e => {
+  if (e.dataTransfer.files.length > 0) {
+    input.files = e.dataTransfer.files;
+    fileName.textContent = '✓ ' + input.files[0].name;
+    dropzone.classList.add('has-file');
+  }
+});
 
-  dropzone.addEventListener('drop', e => {
-    if (e.dataTransfer.files.length > 0) {
-      input.files = e.dataTransfer.files;
-      fileName.textContent = "✓ " + input.files[0].name;
-      dropzone.classList.add('has-file');
-    }
-  });
-
-  const form = document.getElementById('resumeForm');
-  form.addEventListener('submit', (e) => {
-    if (input.files.length === 0) {
-      e.preventDefault();
-      dropzone.classList.add('shake');
-      fileName.textContent = "⚠ No file selected — please choose a resume.";
-      fileName.style.color = "#fca5a5";
-      setTimeout(() => dropzone.classList.remove('shake'), 400);
-    }
-  });
+form.addEventListener('submit', e => {
+  if (input.files.length === 0) {
+    e.preventDefault();
+    dropzone.classList.remove('shake');
+    void dropzone.offsetWidth;
+    dropzone.classList.add('shake');
+    fileName.textContent = '⚠ No file selected — please choose a resume.';
+    fileName.style.color = '#fca5a5';
+    setTimeout(() => dropzone.classList.remove('shake'), 450);
+    return;
+  }
+  submitBtn.textContent = 'Analyzing...';
+  submitBtn.classList.add('loading');
+});
 </script>
 </body>
 </html>

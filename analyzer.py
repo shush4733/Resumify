@@ -332,3 +332,62 @@ def match_with_jd(resume_text, jd_text):
         "match_percent": match_percent,
         "missing_keywords": missing_keywords[:15],  # cap for readability
     }
+
+
+# ----------------------------
+# 6. GEMINI AI FEEDBACK
+# ----------------------------
+
+def get_ai_feedback(resume_text, score):
+    """
+    Sends resume text to Groq (Llama 3.1) and gets personalized AI feedback.
+    Returns a string with 3 specific suggestions, or None if the call fails.
+    Retries once on temporary server errors before giving up silently.
+    """
+    import time
+
+    def _call_groq():
+        import os
+        from groq import Groq
+
+        api_key = os.environ.get("GROQ_API_KEY")
+        if not api_key:
+            return None
+
+        client = Groq(api_key=api_key)
+
+        prompt = f"""You are an expert resume coach reviewing a student's resume.
+The resume scored {score}/100 on an automated analysis.
+
+Resume content:
+{resume_text[:3000]}
+
+Give exactly 3 specific, actionable suggestions to improve this resume.
+Rules:
+- Start directly with "1." — no intro sentence, no preamble
+- Each suggestion: Title: explanation (1-2 sentences max)
+- Format strictly as:
+1. Title: explanation
+2. Title: explanation
+3. Title: explanation
+- Be direct. Focus on what's weak or missing."""
+
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=300,
+        )
+        return response.choices[0].message.content.strip()
+
+    # First attempt
+    try:
+        return _call_groq()
+    except Exception:
+        pass
+
+    # Retry once after 3 seconds
+    try:
+        time.sleep(3)
+        return _call_groq()
+    except Exception:
+        return None
